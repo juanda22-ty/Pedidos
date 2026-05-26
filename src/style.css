@@ -26,6 +26,148 @@ header img {
   height: 100px;
 }
 
+/* --- CONFIGURACIÓN DE LA TABLA DEL CARRITO --- */
+.carrito-tabla {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.carrito-tabla table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.carrito-tabla th,
+.carrito-tabla td {
+  padding: 14px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.carrito-tabla thead th {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85em;
+  letter-spacing: 0.05em;
+  color: #555;
+  background: #fafafa;
+}
+
+.carrito-tabla thead th:last-child {
+  width: 60px;
+}
+
+.carrito-tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.item-carrito {
+  transition: background-color 0.2s ease;
+}
+
+.item-carrito:hover {
+  background-color: #fcfcfc;
+}
+
+.col-eliminar {
+  text-align: center;
+}
+
+/* Alineaciones específicas por columna */
+.col-prod {
+  text-align: left;
+}
+
+.col-cant {
+  text-align: center;
+}
+
+.col-precio {
+  text-align: right;
+  font-weight: 600;
+}
+
+.col-eliminar {
+  display: flex;
+  justify-content: center;
+}
+
+/* Estilos de los textos internos */
+.item-nombre {
+  font-size: 0.95em;
+  color: #333;
+  line-height: 1.2;
+}
+
+.item-cantidad {
+  font-size: 0.9em;
+  color: #666;
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.item-subtotal {
+  color: #333;
+}
+
+/* Botón eliminar mejorado */
+.btn-eliminar {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-eliminar:hover {
+  background-color: #fde8e7;
+  color: #c0392b;
+}
+
+/* Sección de Total rediseñada */
+.total {
+  margin-top: auto; /* Empuja el total al fondo */
+  padding: 15px 5px;
+  border-top: 2px dashed #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.25em;
+}
+
+.total span {
+  color: #555;
+  font-weight: 500;
+}
+
+.total strong {
+  color: #27ae60;
+  font-weight: 800;
+}
+
+/* Botón de compra principal */
+.factura button {
+  width: 100%;
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 14px;
+  font-size: 1.1em;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.factura button:hover {
+  background-color: #219653;
+}
+
 .cart-button {
   position: relative;
   background: transparent;
@@ -39,7 +181,7 @@ header img {
 .cart-button .cart-count {
   position: absolute;
   top: -8px;
-  right: -10px;
+  right: -15px;
   min-width: 20px;
   height: 20px;
   display: inline-flex;
@@ -82,6 +224,25 @@ header i:hover {
   justify-content: center;
   padding: 30px 20px;
   background-color: #f5f5f5;
+  position: relative;
+  min-height: calc(100vh - 230px);
+}
+
+.no-results-menu {
+  width: 100%;
+  min-height: calc(100vh - 228px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.08);
+  padding: 26px;
+}
+
+.no-results-menu p {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
 .products {
@@ -96,8 +257,9 @@ header i:hover {
   background: linear-gradient(135deg, #fff8f3 0%, #ffe8d6 100%);
   transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
   cursor: pointer;
+  width: 100%;
   max-width: 280px;
-  min-height: 440px;
+  min-height: 500px;
   box-shadow: 0 4px 15px rgba(255, 107, 53, 0.15);
 }
 
@@ -250,62 +412,198 @@ button:active {
   background-color: #fff;
 }
 
-.products {
-  min-height: 500px;
-}
-
 .products > p:last-child span {
   font-weight: bold;
 }
 
-.item-carrito {
+/* ===============================
+   Carrito modal (rediseño)
+   Mantiene layout general, pero
+   mejora jerarquía visual.
+   =============================== */
+
+/* Header del modal */
+.ventana-modal .modal-header {
+
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
+  justify-content: space-between;
+  gap: 12px;
+  padding-right: 40px; /* espacio para el botón cerrar */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding-bottom: 14px;
+  margin-bottom: 14px;
 }
 
-.item-info {
-  display: flex;
-  justify-content: space-between;
+.ventana-modal .modal-header h2 {
+  font-size: 1.15rem;
+  color: #111;
+  letter-spacing: 0.2px;
+}
+
+/* Contenido scroll: evita que el total + botón queden fuera */
+.ventana-modal .contenido-scroll {
   flex: 1;
-  align-items: center;
-  gap: 20px;
+  overflow-y: auto;
+  padding-right: 6px;
 }
 
-.btn-eliminar {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 14px;
-  display: flex;
+/* Fila/encabezado tipo tabla con grid */
+.carrito-encabezado {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 6px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.ventana-modal .item-carrito {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 6px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  transition: background-color 0.2s ease, transform 0.12s ease;
+  border-radius: 10px;
+}
+
+.ventana-modal .item-carrito:hover {
+  background: rgba(39, 174, 96, 0.06);
+}
+
+.ventana-modal .item-info {
+  display: contents;
+  text-align: left;
+}
+
+/* Textos dentro */
+.item-nombre {
+  font-size: 0.95em;
+  color: #111;
+  line-height: 1.25;
+  font-weight: 600;
+}
+
+.item-cantidad {
+  font-size: 0.86em;
+  color: #3b3b3b;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 3px 8px;
+  border-radius: 999px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 40px;
-  height: 40px;
-  margin-left: 10px;
+  min-width: 44px;
+}
+
+.item-subtotal {
+  color: #222;
+  font-weight: 700;
+  text-align: right;
+}
+
+.col-precio {
+  text-align: right;
+}
+
+.col-cant {
+  text-align: center;
+}
+
+.col-eliminar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Botón eliminar: estilo acorde al modal */
+.btn-eliminar {
+  background: rgba(39, 174, 96, 0.12);
+  color: #1f8a4c;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-eliminar:hover {
-  background-color: #c82333;
-  transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+  background: rgba(231, 76, 60, 0.12);
+  color: #dc3545;
+  transform: translateY(-1px);
 }
 
 .btn-eliminar:active {
-  transform: scale(0.95);
-  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+  transform: translateY(0);
 }
+
+/* Total (summary card) */
+.total {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: rgba(39, 174, 96, 0.04);
+  border-radius: 12px;
+}
+
+.total span {
+  color: #444;
+  font-weight: 600;
+}
+
+.total strong {
+  color: #27ae60;
+  font-weight: 900;
+  font-size: 1.25em;
+}
+
+/* CTA */
+.factura {
+  padding-top: 12px;
+}
+
+.factura button {
+  width: 100%;
+  background: linear-gradient(135deg, #27ae60 0%, #1f8a4c 100%);
+  color: #fff;
+  border: none;
+  padding: 14px;
+  font-size: 1.08em;
+  font-weight: 800;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.12s ease;
+  box-shadow: 0 10px 22px rgba(39, 174, 96, 0.18);
+}
+
+.factura button:hover {
+  filter: brightness(1.02);
+  transform: translateY(-1px);
+}
+
+.factura button:active {
+  transform: translateY(0);
+}
+
 
 /* Estilos para el modal de agregar producto */
 .modal-agregar {
   max-width: 500px;
   width: 90%;
+  position: fixed;
+  top: 10%;
+  right: 50%;
+  transform: translateX(50%);
+  height: auto;
 }
 
 .formulario-producto {
@@ -327,17 +625,20 @@ button:active {
 }
 
 .form-group input,
-.form-group textarea {
+.form-group textarea,
+.form-group select {
   padding: 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-family: 'Arial', sans-serif;
   font-size: 14px;
   transition: border-color 0.3s ease;
+  width: 100%;
 }
 
 .form-group input:focus,
-.form-group textarea:focus {
+.form-group textarea:focus,
+.form-group select:focus {
   outline: none;
   border-color: #000;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
@@ -356,7 +657,7 @@ button:active {
 }
 
 .btn-guardar {
-  background-color: #000000;
+  background-color: #2c8024;
   color: white;
   padding: 12px 24px;
   border: none;
@@ -373,11 +674,6 @@ button:active {
   box-shadow: 0 6px 12px rgba(255, 102, 0, 0.4);
 }
 
-.btn-guardar:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
-}
-
 .btn-cancelar {
   background-color: #ff0000;
   color: white;
@@ -390,13 +686,79 @@ button:active {
   box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
 }
 
-.btn-cancelar:hover {
-  background-color: #ff2323;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(108, 117, 125, 0.4);
+/* ==========================================================================
+   MEDIA QUERIES (RESPONSIVE)
+   ========================================================================== */
+
+/* Tabletas y Pantallas Medianas (Mínimo ajuste del Header) */
+@media (max-width: 768px) {
+  header {
+    padding: 10px 15px;
+  }
+  
+  header img {
+    height: 70px;
+  }
+  
+  .products {
+    max-width: 45%; /* Permite dos productos por fila en pantallas medianas */
+    min-height: 480px;
+  }
+  
+  .products img {
+    height: 160px;
+  }
 }
 
-.btn-cancelar:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
+/* Móviles Pequeños (Un solo producto por fila y tabla comprimida) */
+@media (max-width: 480px) {
+  header {
+    padding: 10px 15px;
+  }
+
+  header img {
+    height: 55px;
+  }
+
+  header i, .cart-button {
+    font-size: 20px;
+  }
+
+  /* Ajuste para que las tarjetas de producto sean más anchas y no se vean delgadas */
+  #menu {
+    padding: 20px 10px; /* Reducimos el padding lateral del contenedor principal */
+    gap: 15px;
+  }
+
+  .products {
+    width: 95%;        /* Ocupa casi la totalidad del ancho de la pantalla */
+    max-width: 100%;   /* Rompe el límite de 280px de escritorio */
+    min-height: auto;  /* Deja que el alto se adapte al contenido de forma fluida */
+    padding: 20px;     /* Más espacio interno para que respire el texto */
+    margin: 0 auto;    /* Centra la tarjeta perfectamente */
+  }
+
+  .products img {
+    height: auto;      /* Mantiene la proporción de la imagen */
+    max-height: 220px; /* Evita que crezca desproporcionadamente */
+    object-fit: contain;
+  }
+
+  /* Cambia la cuadrícula del carrito en móvil para que no se desborde */
+  .ventana-modal .item-carrito, 
+  .carrito-encabezado {
+    grid-template-columns: 2fr 1fr 1fr 1fr;; 
+    gap: 5px;
+    font-size: 0.85rem;
+  }
+
+  .item-cantidad {
+    padding: 2px 4px;
+  }
+
+  .btn-eliminar {
+    width: 30px;
+    height: 30px;
+    padding: 4px;
+  }
 }
