@@ -340,9 +340,10 @@ button:disabled {
 }
 
 .products img {
-  max-width: 100%;
-  height: 200px;
-  object-fit: contain;
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  object-position: center;
   border-radius: 4px;
   margin-bottom: 10px;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
@@ -657,7 +658,7 @@ button:active {
 }
 
 .btn-guardar {
-  background-color: #2c8024;
+  background-color: #000000;
   color: white;
   padding: 12px 24px;
   border: none;
@@ -669,13 +670,13 @@ button:active {
 }
 
 .btn-guardar:hover {
-  background-color: #ff4400;
+  background-color: #1f6300;
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(255, 102, 0, 0.4);
 }
 
 .btn-cancelar {
-  background-color: #ff0000;
+  background-color: #ff1e00;
   color: white;
   padding: 12px 24px;
   border: none;
@@ -706,7 +707,10 @@ button:active {
   }
   
   .products img {
-    height: 160px;
+    width: 100%;
+    height: auto;
+    max-height: 250px;
+    object-fit: contain;
   }
 }
 
@@ -732,15 +736,16 @@ button:active {
 
   .products {
     width: 95%;        /* Ocupa casi la totalidad del ancho de la pantalla */
-    max-width: 100%;   /* Rompe el límite de 280px de escritorio */
+    max-width: 100%;   /* ñRompe el límite de 280px de escritorio */
     min-height: auto;  /* Deja que el alto se adapte al contenido de forma fluida */
     padding: 20px;     /* Más espacio interno para que respire el texto */
     margin: 0 auto;    /* Centra la tarjeta perfectamente */
   }
 
   .products img {
-    height: auto;      /* Mantiene la proporción de la imagen */
-    max-height: 220px; /* Evita que crezca desproporcionadamente */
+    width: 100%;
+    height: auto;
+    max-height: 200px;
     object-fit: contain;
   }
 

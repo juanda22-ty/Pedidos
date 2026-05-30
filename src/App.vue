@@ -70,6 +70,7 @@
 
 <div v-show="mostrarModalAgregar" class="ventana-modal modal-agregar">
     <h2>Agregar Nuevo Producto</h2>
+    <button class="btn-cerrar" @click="toggleModalAgregar()">&times;</button>
     <form novalidate @submit.prevent="guardarProducto" class="formulario-producto">
       <div class="form-group">
         <label>Nombre del Producto:</label>
@@ -87,6 +88,7 @@
           <option value="">Selecciona una categoría</option>
           <option value="Hamburguesas">Hamburguesas</option>
           <option value="Sándwiches">Sándwiches</option>
+          <option value="Perros">Perros</option>
           <option value="Pizzas">Pizzas</option>
           <option value="Pollo">Pollo</option>
           <option value="Mariscos">Mariscos</option>
@@ -99,7 +101,13 @@
           <option value="Acompañamientos">Acompañamientos</option>
           <option value="Postres">Postres</option>
           <option value="Bebidas">Bebidas</option>
+          <option value="Otra">Otra</option>
         </select>
+      </div>
+
+      <div v-if="nuevoProducto.categoria === 'Otra'" class="form-group">
+        <label>Nueva categoría:</label>
+        <input v-model="nuevoProducto.categoriaNueva" type="text" placeholder="Ej: Sandwiches especiales">
       </div>
 
       <div class="form-group">
@@ -204,7 +212,8 @@ const nuevoProducto = ref({
   precio: 0,
   imagen: '',
   unidades: 15,
-  categoria: ''
+  categoria: '',
+  categoriaNueva: ''
 });
 
 function cargarCarrito() {
@@ -228,7 +237,7 @@ const menuPorDefecto = [
   { id: 1, nombre: "Hamburguesa", imagen: "https://png.pngtree.com/png-vector/20240829/ourmid/pngtree-delicious-and-testy-cheese-burger-png-image_13659847.png", descripcion: "Carne de res, cebolla salteada, lechuga, tomate y papas", precio: 12.50, unidades: unidadesGuardadas?.[0] ?? 15, categoria: "Hamburguesas" },
   { id: 2, nombre: "Hamburguesa Doble", imagen: "https://png.pngtree.com/png-clipart/20240321/original/pngtree-double-cheese-burger-png-image_14644513.png", descripcion: "Doble carne, doble queso y vegetales", precio: 15.00, unidades: unidadesGuardadas?.[1] ?? 15, categoria: "Hamburguesas" },
   { id: 3, nombre: "Hamburguesa Triple", imagen: "https://png.pngtree.com/png-vector/20250408/ourmid/pngtree-delicious-triple-layer-cheeseburger-with-lettuce-and-tomato-for-fast-food-png-image_15942712.png", descripcion: "Triple carne, queso y vegetales frescos", precio: 8.00, unidades: unidadesGuardadas?.[2] ?? 15, categoria: "Hamburguesas" },
-  { id: 4, nombre: "Perro Caliente", imagen: "https://png.pngtree.com/png-vector/20241123/ourmid/pngtree-loaded-hot-dog-with-savory-toppings-png-image_14549006.png", descripcion: "Salchica americana, tocineta, queso, salsas a tu elección y carne", precio: 10.00, unidades: unidadesGuardadas?.[3] ?? 15, categoria: "Sándwiches" },
+  { id: 4, nombre: "Perro Caliente", imagen: "https://png.pngtree.com/png-vector/20241123/ourmid/pngtree-loaded-hot-dog-with-savory-toppings-png-image_14549006.png", descripcion: "Salchica americana, tocineta, queso, salsas a tu elección y carne", precio: 10.00, unidades: unidadesGuardadas?.[3] ?? 15, categoria: "Perros" },
   { id: 5, nombre: "Salchipapa", imagen: "https://static.vecteezy.com/system/resources/thumbnails/071/169/358/small/delicious-bacon-cheese-fries-isolated-on-transparent-background-free-png.png", descripcion: "Papas crujientes con salchicha y salsas", precio: 9.50, unidades: unidadesGuardadas?.[4] ?? 15, categoria: "Acompañamientos" },
   { id: 6, nombre: "Patacón relleno", imagen: "https://lalagourmetkc.com/wp-content/uploads/2024/02/patacon-pollo-con-lomito-324x324.png", descripcion: "Plátano frito relleno de carne y queso", precio: 11.00, unidades: unidadesGuardadas?.[5] ?? 15, categoria: "Platos Especiales" },
   { id: 7, nombre: "Tacos de Pollo", imagen: "https://png.pngtree.com/png-vector/20241110/ourmid/pngtree-authentic-chicken-tacos-with-cilantro-png-image_14338727.png", descripcion: "Tacos con pollo desmenuzado y vegetales frescos", precio: 9.00, unidades: unidadesGuardadas?.[6] ?? 15, categoria: "Mexicana" },
@@ -289,7 +298,10 @@ function totalProductos() {
 }
 
 function toggleModal() {
+  // Si el modal del carrito está abierto, ciérralo.
+  // Si el modal de agregar está abierto, también ciérralo para que el botón "X" funcione.
   mostrarModal.value = !mostrarModal.value;
+  mostrarModalAgregar.value = false;
 }
 
 function guardarCarrito() {
@@ -297,27 +309,59 @@ function guardarCarrito() {
 }
 
 function agregarAlCarrito(plato, sabor = null) {
-  if (plato.unidades == 0) {
-    alert('No hay unidades disponibles');
+  // Validación de integridad: el producto debe existir en el menú
+  const productoMenu = menu.value.find(p => p.id === plato?.id);
+  if (!productoMenu) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Producto no disponible',
+      text: 'El producto ya no existe en el menú. Recarga la página e inténtalo de nuevo.',
+      background: '#ffffff'
+    });
     return;
   }
-  
-  const nombreCompleto = sabor ? `${plato.nombre} (${sabor})` : plato.nombre;
-  const itemExistente = carrito.value.find(item => item.id === plato.id && item.sabor === sabor);
-  
+
+  // Validación de stock
+  if (productoMenu.unidades == 0) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Sin unidades disponibles',
+      text: 'Este producto está agotado.',
+      background: '#ffffff'
+    });
+    return;
+  }
+
+  // Validación de sabor (si aplica)
+  if (productoMenu.sabores && productoMenu.sabores.length > 0) {
+    const saborValido = sabor && productoMenu.sabores.includes(sabor);
+    if (!saborValido) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Sabor inválido',
+        text: 'Selecciona un sabor válido para este producto.',
+        background: '#ffffff'
+      });
+      return;
+    }
+  }
+
+  const nombreCompleto = sabor ? `${productoMenu.nombre} (${sabor})` : productoMenu.nombre;
+  const itemExistente = carrito.value.find(item => item.id === productoMenu.id && item.sabor === sabor);
+
   if (itemExistente) {
     itemExistente.cantidad++;
   } else {
     carrito.value.push({
-      id: plato.id,
+      id: productoMenu.id,
       nombre: nombreCompleto,
-      precio: plato.precio,
+      precio: productoMenu.precio,
       cantidad: 1,
       sabor: sabor
     });
   }
-  
-  plato.unidades--;
+
+  productoMenu.unidades--;
   guardarCarrito();
   guardarUnidades();
 }
@@ -337,29 +381,74 @@ function formatearPrecio(valor) {
 }
 
 function eliminarDelCarrito(item) {
-  const indice = carrito.value.findIndex(carritoItem => carritoItem.id === item.id && carritoItem.sabor === item.sabor);
-  
-  if (indice !== -1) {
-    const itemCarrito = carrito.value[indice];
-    
-    // Encontrar el producto en el menú para recuperar el stock
-    const productoMenu = menu.value.find(plato => plato.id === item.id);
-    
-    if (productoMenu) {
-      // Recuperar el stock según la cantidad en el carrito
-      productoMenu.unidades += itemCarrito.cantidad;
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: `¿Deseas eliminar "${item.nombre}" del carrito?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#000000',
+    cancelButtonColor: '#ff4400',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    background: '#ffffff'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const indice = carrito.value.findIndex(carritoItem => carritoItem.id === item.id && carritoItem.sabor === item.sabor);
+      
+      if (indice !== -1) {
+        const itemCarrito = carrito.value[indice];
+        
+        // Encontrar el producto en el menú para recuperar el stock
+        const productoMenu = menu.value.find(plato => plato.id === item.id);
+        
+        if (productoMenu) {
+          // Recuperar el stock según la cantidad en el carrito
+          productoMenu.unidades += itemCarrito.cantidad;
+        }
+        
+        // Eliminar el producto del carrito
+        carrito.value.splice(indice, 1);
+        
+        // Guardar los cambios
+        guardarCarrito();
+        guardarUnidades();
+        
+        Swal.fire({
+          icon: 'success',
+          title: '¡Eliminado!',
+          text: `"${item.nombre}" ha sido quitado del carrito.`,
+          timer: 1500,
+          showConfirmButton: false,
+          background: '#ffffff'
+        });
+      }
     }
-    
-    // Eliminar el producto del carrito
-    carrito.value.splice(indice, 1);
-    
-    // Guardar los cambios
-    guardarCarrito();
-    guardarUnidades();
-  }
+  });
 }
 
 function exportToPDF() {
+  // Validaciones antes de generar la factura
+  if (!Array.isArray(carrito.value) || carrito.value.length === 0) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Carrito vacío',
+      text: 'Agrega productos al carrito antes de comprar.',
+      background: '#ffffff'
+    });
+    return;
+  }
+
+  const total = calcularTotal();
+  if (!Number.isFinite(total) || total <= 0) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error al calcular el total',
+      text: 'El total del carrito no es válido. Revisa el contenido del carrito.',
+      background: '#ffffff'
+    });
+    return;
+  }
+
   procesando.value = true;
   
   setTimeout(() => {
@@ -455,7 +544,8 @@ function toggleModalAgregar() {
       precio: 0,
       imagen: '',
       unidades: 15,
-      categoria: ''
+      categoria: '',
+      categoriaNueva: ''
     };
   }
 }
@@ -465,7 +555,7 @@ function mostrarAlertaCampo(titulo, texto) {
     icon: 'error',
     title: titulo,
     text: texto,
-    confirmButtonColor: '#ff6b35',
+    confirmButtonColor: '#ff4400',
     background: '#ffffff'
   });
 }
@@ -485,6 +575,11 @@ function validarProducto() {
 
   if (!producto.categoria) {
     mostrarAlertaCampo('Categoría requerida', 'Selecciona una categoría para el producto.');
+    return false;
+  }
+
+  if (producto.categoria === 'Otra' && (!producto.categoriaNueva || !producto.categoriaNueva.trim())) {
+    mostrarAlertaCampo('Nueva categoría requerida', 'Escribe el nombre de la nueva categoría.');
     return false;
   }
 
@@ -530,6 +625,10 @@ function guardarProducto() {
   }
 
   const maxId = Math.max(...menu.value.map(p => p.id), 0);
+  const categoriaFinal = nuevoProducto.value.categoria === 'Otra'
+    ? nuevoProducto.value.categoriaNueva.trim()
+    : nuevoProducto.value.categoria;
+
   const productoNuevo = {
     id: maxId + 1,
     nombre: nuevoProducto.value.nombre.trim(),
@@ -537,7 +636,7 @@ function guardarProducto() {
     precio: parseFloat(nuevoProducto.value.precio),
     imagen: nuevoProducto.value.imagen.trim(),
     unidades: parseInt(nuevoProducto.value.unidades, 10) || 0,
-    categoria: nuevoProducto.value.categoria
+    categoria: categoriaFinal
   };
 
   menu.value.push(productoNuevo);
@@ -549,7 +648,8 @@ function guardarProducto() {
     precio: 0,
     imagen: '',
     unidades: 15,
-    categoria: ''
+    categoria: '',
+    categoriaNueva: ''
   };
 
   mostrarModalAgregar.value = false;
@@ -580,7 +680,7 @@ function eliminarProducto(plato) {
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#000000', // Color negro para confirmar
-    cancelButtonColor: '#ff0000',  // Color rojo para cancelar
+    cancelButtonColor: '#ff4400',  // Color rojo para cancelar
     confirmButtonText: 'Sí, eliminar',
     cancelButtonText: 'Cancelar',
     background: '#ffffff'
@@ -596,9 +696,25 @@ function eliminarProducto(plato) {
       if (index !== -1) {
         menu.value.splice(index, 1);
         guardarMenu();
+        // Validación extra: si el producto estaba dentro del carrito, ya se eliminan esos items
+        const antes = carrito.value.length;
         carrito.value = carrito.value.filter(item => item.id !== plato.id);
+        const despues = carrito.value.length;
+
         guardarCarrito();
         guardarUnidades();
+
+        if (antes === despues) {
+          // Caso: el producto se borró del menú pero no estaba en el carrito
+          Swal.fire({
+            icon: 'info',
+            title: 'Eliminado',
+            text: `"${plato.nombre}" se eliminó del menú (no estaba en el carrito).`,
+            timer: 1800,
+            showConfirmButton: false,
+            background: '#ffffff'
+          });
+        }
       }
       // ============================================================
 
@@ -643,12 +759,6 @@ function eliminarProducto(plato) {
   background-color: #fff;
 }
 
-.products img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 4px;
-}
-
 .products h1 {
   font-size: 1.2em;
   margin: 10px 0;
@@ -686,6 +796,8 @@ function eliminarProducto(plato) {
   border-radius: 8px;
   padding: 20px;
   height: 100vh;
+  max-height: 100vh;
+  overflow-x: auto;
   z-index: 1000;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   animation: slideInFromRight 0.3s ease forwards;
@@ -716,7 +828,9 @@ h2 {
 
 .contenido-scroll {
   flex-grow: 1;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: auto;
 }
 
 .factura {
@@ -843,7 +957,6 @@ h2 {
 
 .search-input::placeholder {
   color: #ff6b35;
-  opacity: 0.6;
 }
 
 .clear-btn {
@@ -999,6 +1112,7 @@ h2 {
   
   border-radius: 8px !important;
   overflow-y: auto !important; /* Esto activa el scroll si el formulario es largo */
+  overflow-x: auto !important;
   animation: slideInFromRight 0.3s ease forwards !important;
 }
 }
